@@ -42,7 +42,6 @@ public class ChestListener implements Listener {
         Iterator<Entity> iterator = entities.iterator();
 
         boolean flag = false;
-
         while(iterator.hasNext()) {
             Entity entity = iterator.next();
             if(entity.getType() == EntityType.CAT && ((Sittable) entity).isSitting()) {
