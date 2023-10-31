@@ -1,0 +1,7 @@
+name: GetOutOffMyChest
+author: YK_DZ
+description: Let the chest throws the cat away when they sit above the it.
+version: '${version}'
+main: cn.encmys.ykdz.forest.getoutoffmychest.GetOutOffMyChest
+api-version: '1.15'
+depend: [ ProtocolLib ]
