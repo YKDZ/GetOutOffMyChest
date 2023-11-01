@@ -36,7 +36,7 @@ public class ChestListener implements Listener {
 
         Player p = e.getPlayer();
         Block b = e.getClickedBlock();
-        Vector vec = ((Chest) b.getBlockData()).getFacing().getOppositeFace().getDirection().add(new Vector(0, 1, 0)).normalize().multiply(speed);
+        Vector vec = ((Chest) b.getBlockData()).getFacing().getOppositeFace().getDirection().normalize().add(new Vector(0, 1, 0)).normalize().multiply(speed);
         Collection<Entity> entities = EntityUtils.getEntitiesAboveBlock(b, 1d);
         Iterator<Entity> iterator = entities.iterator();
 
