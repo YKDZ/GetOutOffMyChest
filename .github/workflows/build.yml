@@ -65,13 +65,15 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@master
+      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{secrets.TOKEN}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: Release_${{steps.get_info.outputs.version}}
-        release_name: Release of version ${{steps.get_info.outputs.version}}
-        draft: true
+        tag_name: v${{ steps.getVersion.outputs.version }}
+        release_name: Release ${{ steps.getVersion.outputs.version }}
+        body: |
+          Add release notes here. You can use the version variable like this: `${{ steps.getVersion.outputs.version }}`
+        draft: false
         prerelease: false
 
     - name: Upload Release Asset
