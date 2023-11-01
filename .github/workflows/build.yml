@@ -61,7 +61,8 @@ jobs:
 
     - name: Get version from build.gradle
       id: getVersion
-      run: echo "::set-output name=version::$(grep -Po "(?<=version ')[^']+" build.gradle)"
+      run: |
+        VERSION=`grep version build.gradle | grep '=' | grep -Eo \'.*\' | grep -Eo '[a-z|A-Z|0-9|.|_]*'`
 
     - name: Create Release
       id: create_release
@@ -69,17 +70,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
-        tag_name: v${{ steps.getVersion.outputs.version }}
-        release_name: Release ${{ steps.getVersion.outputs.version }}
-        body: |
-          Add release notes here. You can use the version variable like this: `${{ steps.getVersion.outputs.version }}`
+        tag_name: v${{steps.getVersion.outputs.version}}
+        release_name: Release ${{steps.getVersion.outputs.version}}
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@master
-      env:
-        GITHUB_TOKEN: ${{secrets.RELEASE_TOKEN}}
-      with:
-        asset_path: build/libs/*.jar
