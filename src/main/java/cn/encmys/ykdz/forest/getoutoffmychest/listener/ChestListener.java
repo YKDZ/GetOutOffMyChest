@@ -28,7 +28,6 @@ public class ChestListener implements Listener {
 
     private FileConfiguration config = GetOutOffMyChest.getMainConfig();
     private float speed = config.getLong("options.speed", 1);
-    private float angle = config.getLong("options.angle", 45);
 
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onChestOpened(PlayerInteractEvent e) {
