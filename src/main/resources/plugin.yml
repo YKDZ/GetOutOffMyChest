@@ -1,6 +1,6 @@
 name: GetOutOffMyChest
 author: YK_DZ
-description: Let the chest throws the cat away if they sit above the it when the chest is opened.
+description: Let the chest throws the cat away if they sit above the it when opened.
 version: '${version}'
 main: cn.encmys.ykdz.forest.getoutoffmychest.GetOutOffMyChest
 api-version: '1.15'
