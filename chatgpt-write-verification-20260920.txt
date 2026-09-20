@@ -1,3 +1,0 @@
-Temporary file for an owner-authorized GitHub write verification.
-This file is intentionally deleted in the next commit.
-No application code or configuration is changed.
