@@ -1,0 +1,40 @@
+name: ChatGPT Actions verification
+
+on:
+  push:
+    branches:
+      - chatgpt/actions-verification-20260920-47a15c1
+    paths:
+      - .github/workflows/chatgpt-actions-verification.yml
+
+permissions: {}
+
+jobs:
+  verify:
+    name: Verify execution and readable logs
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify repository and branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "YKDZ/GetOutOffMyChest"
+          test "$GITHUB_REF" = "refs/heads/chatgpt/actions-verification-20260920-47a15c1"
+          printf 'Repository: %s\nBranch: %s\nCommit: %s\nAttempt: %s\n' "$GITHUB_REPOSITORY" "$GITHUB_REF" "$GITHUB_SHA" "$GITHUB_RUN_ATTEMPT"
+      - name: Run deterministic smoke check
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$((19 + 23))" -eq 42
+          printf 'CHATGPT_ACTIONS_VERIFICATION_OK\n'
+      - name: Record verification summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf '## Authorized Actions verification\n\n'
+            printf 'Result: success\n\n'
+            printf 'This isolated test does not check out code, access secrets, deploy, or publish releases.\n\n'
+            printf 'Run ID: %s; attempt: %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+          } >> "$GITHUB_STEP_SUMMARY"
