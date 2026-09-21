@@ -1,0 +1,90 @@
+name: ChatGPT Gradle build verification
+
+on:
+  push:
+    branches:
+      - chatgpt/gradle-build-verification-20260921
+    paths:
+      - .github/workflows/chatgpt-gradle-build-verification.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build original repository and inspect JAR
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out the original source commit
+        uses: actions/checkout@v4
+        with:
+          ref: 47a15c100008028030dd8ad7b688791bd60224db
+          persist-credentials: false
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Record build provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verification-output
+          {
+            printf 'Repository: %s\n' "$GITHUB_REPOSITORY"
+            printf 'Source commit: %s\n' "$(git rev-parse HEAD)"
+            printf 'Workflow commit: %s\n' "$GITHUB_SHA"
+            printf 'Run ID: %s\n' "$GITHUB_RUN_ID"
+            printf 'Command: bash ./gradlew --no-daemon --console=plain clean build --stacktrace\n'
+            java -version 2>&1
+          } | tee verification-output/provenance.txt
+          bash ./gradlew --version --console=plain 2>&1 | tee verification-output/gradle-version.txt
+      - name: Run Gradle clean build
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          bash ./gradlew --no-daemon --console=plain clean build --stacktrace 2>&1 | tee verification-output/gradle-build.log
+      - name: Inspect generated JAR files
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          jars=(build/libs/*.jar)
+          test "${#jars[@]}" -gt 0
+          for file in "${jars[@]}"; do
+            base="$(basename "$file")"
+            stat --printf='%n: %s bytes\n' "$file" | tee -a verification-output/artifact-sizes.txt
+            sha256sum "$file" | tee -a verification-output/SHA256SUMS.txt
+            jar tf "$file" | tee "verification-output/${base}.contents.txt"
+            unzip -p "$file" plugin.yml | tee "verification-output/${base}.plugin.yml"
+          done
+          git diff --exit-code
+          git diff --cached --exit-code
+          {
+            printf '## Gradle build verification\n\n'
+            printf 'Source commit: `47a15c100008028030dd8ad7b688791bd60224db`\n\n'
+            printf 'No tracked source or build configuration files were modified.\n\n'
+            printf '### Produced files\n\n```text\n'
+            cat verification-output/artifact-sizes.txt verification-output/SHA256SUMS.txt
+            printf '```\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload built JAR files
+        uses: actions/upload-artifact@v4
+        with:
+          name: GetOutOffMyChest-jars-${{ github.run_id }}
+          path: build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload build evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-evidence-${{ github.run_id }}
+          path: |
+            verification-output/
+            build/reports/
+            build/test-results/
+          if-no-files-found: warn
+          retention-days: 7
